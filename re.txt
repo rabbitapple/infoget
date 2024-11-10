@@ -1,0 +1,121 @@
+from scapy.all import *
+import os
+from halfscanning import Halfscan
+import traceback
+
+
+
+
+class Verscan1(Halfscan):
+
+
+    def tcpack(self,pkt):
+        try: 
+            rawdata = None  
+            ether = Ether(dst = pkt[Ether].src, src = pkt[Ether].dst)
+            ip = IP(dst = pkt[IP].src, src = pkt[IP].dst)
+            # tcp = TCP(dport = pkt[TCP].dport, sport = pkt[TCP].sport, flags = "A", seq = pkt[TCP].ack , ack = pkt[TCP].seq+1)
+            tcp = TCP(dport = pkt[TCP].sport, sport = pkt[TCP].dport, flags = "A", seq = pkt.ack , ack = pkt.seq+1)
+            print(1)
+            res = srp1(ether/ip/tcp,verbose = 0, timeout = 1)
+            res.show()
+
+            if res != None:
+                loaddata = res[3].load
+                try:
+                    # UTF-8 디코딩
+                    rawdata = loaddata.decode('utf-8', errors='ignore').strip()
+                except UnicodeDecodeError:
+                    # ASCII로 디코딩 
+                    rawdata = loaddata.decode('ascii', errors='ignore').strip()
+
+
+            # info = str(res[Raw].load)
+            return rawdata
+        except:
+            print(traceback.format_exc())
+
+            return
+    def sendrst(self, dmac, dip, dport):
+        #r패킷
+        ether = Ether(dst = dmac)
+        ip = IP(dst = dip)
+
+        p_list = dport.split(",")
+        tcp = TCP(dport = int(p_list[0]), sport = 50000 + int(p_list[0]), flags = "R")
+        srp1(ether/ip/tcp,verbose = 0, timeout = 0) 
+
+    def osdeco(func):
+        def indeco(self, *args, **kwargs):
+            # 방화벽 해제
+            os.system( "iptables -A OUTPUT -p tcp --tcp-flags RST RST -s " + self.getmyip() + " -j DROP"  )
+            # iptables -A OUTPUT -p tcp --tcp-flags RST RST -s 172.16.20.15 -j DROP
+
+            # os.system("tput smcup")
+            clearcmd = "clear"
+            os.system(clearcmd)
+
+            returnlist = func(self, *args, **kwargs)
+
+            os.system( "iptables -D OUTPUT -p tcp --tcp-flags RST RST -s " + self.getmyip() + " -j DROP"  )
+            # os.system("tput rmcup")                     
+            return returnlist
+        return indeco
+        
+
+        
+
+    @osdeco
+    def scanstart(self, dip):
+        try:
+
+            # Mac 주소 획득
+            dmac = self.getmac(dip)
+
+            if dmac == 0:
+                return
+
+            # 2,3 Layer 패킷빌딩
+            ether = Ether(dst = dmac)
+            ip = IP(dst = dip)
+
+            # 포트 정보 가져오기 / 가공
+            with open("./port_db", "r", encoding="UTF-8") as dbfile:
+                port_db = dbfile.read()
+
+            port_list = port_db.strip().splitlines()
+
+            # wellkown포트 TCP 패킷 전송/결과출력
+
+            print("%-5s%-25s"%("Port", "Discription"))
+
+            open_port = []
+            for i in port_list:
+                p_list = i.split(",")
+                tcp = TCP(dport = int(p_list[0]))
+
+                res = srp1(ether/ip/tcp, verbose = 0)
+
+                if res[TCP].flags == "SA":
+                    #재전송
+                    res1 = srp1(ether/ip/tcp, verbose = 0)
+                    #ACK
+                    adddis = self.tcpack(res1)            
+                    #출력/저장    
+                    open_port.append([p_list[0], p_list[1],adddis])
+                    print("%-5s%-25s"%(p_list[0], p_list[1]))
+                    print("%5s%-25s"%(":", adddis))
+            input("End")
+            return open_port
+        except:
+            # os.system("tput rmcup")
+            print(traceback.format_exc())
+
+
+
+
+
+if __name__ == "__main__":
+    scan = Verscan1()
+    scan.scanstart("172.16.20.7")
+    
