@@ -84,7 +84,7 @@ class Verscan(Halfscan):
             return returnlist
         return indeco
     
-       
+      
 
     @osdeco
     def scanstart(self, dip:str):
@@ -110,7 +110,7 @@ class Verscan(Halfscan):
             ip = IP(dst = dip)
 
             # 포트 정보 가져오기 / 가공
-            with open("./port_db", "r", encoding="UTF-8") as dbfile:
+            with open(self.path + "/../db_data/port_db", "r", encoding="UTF-8") as dbfile:
                 port_db = dbfile.read()
 
             port_list = port_db.strip().splitlines()
@@ -153,6 +153,9 @@ class Verscan(Halfscan):
                     print("%5s%-25s"%(":", adddis))
             input("End")
             return open_port
+        except TypeError:
+            # os.system("tput rmcup")
+            print("TypeError: 호스트가 존재하지 않을 수 있습니다.")
 
         except:
             # os.system("tput rmcup")
@@ -164,5 +167,5 @@ class Verscan(Halfscan):
 
 if __name__ == "__main__":
     scan = Verscan()
-    scan.scanstart("172.16.20.9")
+    scan.scanstart("172.16.20.15")
     

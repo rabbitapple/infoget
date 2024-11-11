@@ -110,8 +110,9 @@ class Pingscan(Halfscan):
     
     def ping(self, dip):
         """
-        Scapy를 통해 ICMP패킷을 전송하고, Response패킷의 ICMP 코드값이 0인지 확인하는 메서드
+        Scapy를 통해 ICMP패킷을 전송하고, Response패킷의 ICMP 코드값이 0인지 확인하고 결과 및 패킷 Response를 반환.
         0일경우 True를, 이외의 코드이거나 Response패킷이 없을경우 0을 반환
+        ICMP Response를 반환
         Destination Mac 주소는 FF:FF:FF:FF:FF:FF를 사용.
 
         Args:
@@ -120,6 +121,7 @@ class Pingscan(Halfscan):
             bool:
                 - True: Response Packet의 ICMP Coad가 0일경우
                 - False:  Response Packet의 ICMP Coad가 0이 아니거나 Response Packet이 없을 경우
+            object: ICMP Response 패킷. scapy 패킷 Object 형태
         """
         ether = Ether(dst = "ff:ff:ff:ff:ff:ff")
         ip = IP(dst = dip, src = self.my_ip)
@@ -132,14 +134,32 @@ class Pingscan(Halfscan):
 
         try:
             if res[ICMP].code == 0:
-                return True
+                return (True, res)
             else:
-                return False
+                return (False, res)
         except:
-            return False
+            res = None
+            return (False, res)
 
+    def os_from_ttl(self, ttl):
+        """
+        ICMP Packet의 TTL을 받아 상대의 OS를 판단하여 반환하는 메서드
+        Args:
+            ttl(int): ICMP의 TTL값
+        Returns:
+            str: TTL 값에 해당하는 OS 반환.
+        """
+        if ttl == 128:
+            host_os = "Window"
+        elif ttl == 64:
+            host_os = "Linux"
+        elif ttl == 255:
+            host_os = "Cisco"
+        else:
+            host_os = "Unknown"
+        return host_os
 
-
+       
                     
     def scanstart(self, iprange):
         """
@@ -171,14 +191,22 @@ class Pingscan(Halfscan):
             cnt = 0
             while run and (cnt < 5):
                 cnt += 1
-                if self.ping(i):
+                issit_res, res_pkt = self.ping(i)
+                if issit_res :
                     run = False
+                    if res_pkt != None:
+                        os_name = self.os_from_ttl(res_pkt[IP].ttl)
+                        print("%s:\n\tHost is Up\n\tOS is %s"%(i, os_name))
+                    else:
+                        print("%s:\n\tHost is Up"%(i))
+
                     findhost_list.append(i)
-                    print("%s:\n\tHost is Up"%i)
+                    
         return findhost_list
 
 
 
 if __name__ == "__main__" :
+
     a = Pingscan()
     b = a.scanstart("172.16.20.0/24")

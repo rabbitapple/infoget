@@ -11,6 +11,7 @@ class Halfscan:
         """
         local network 정보 정의
         """
+        self.path = os.path.dirname(os.path.abspath(__file__))
         self.gateway = self.getgateway()
         if self.gateway != "0.0.0.0":
             self.gateway_mac = self.getmac(self.gateway)
@@ -110,8 +111,9 @@ class Halfscan:
             ip = IP(dst = dip)
 
             # 포트 정보 가져오기 / 가공
-            with open("./port_db", "r", encoding="UTF-8") as dbfile:
+            with open(self.path + "/../db_data/port_db", "r", encoding="UTF-8") as dbfile:
                 port_db = dbfile.read()
+            print(self.path + "/../db_data/port_db")
 
             port_list = port_db.strip().splitlines()
             
@@ -130,6 +132,9 @@ class Halfscan:
                     print("%-5s%-25s"%(p_list[0], p_list[1]))
             input("End")
             os.system("tput rmcup")
+        except TypeError:
+            os.system("tput rmcup")
+            print("TypeError: 호스트가 존재하지 않을 수 있습니다.")
 
         except:
             os.system("tput rmcup")
@@ -139,4 +144,4 @@ class Halfscan:
 
 if __name__ == "__main__":
     scan = Halfscan()
-    scan.scanstart("172.16.20.9")
+    scan.scanstart("172.16.20.15")

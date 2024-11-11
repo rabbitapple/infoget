@@ -1,4 +1,5 @@
 # oui.py
+import os
 
 def oui_data():
     """
@@ -7,7 +8,7 @@ def oui_data():
         list: [[Mac, 장치명, 제조사]] 형태의 리스트 반환
     """
     ouikey = {}
-    with open("oui_db", "r", encoding="UTF-8") as db:
+    with open(os.path.dirname(os.path.abspath(__file__)) + "/../db_data/oui_db", "r", encoding="UTF-8") as db:
         ouidb = db.read()
     ouili = ouidb.strip().splitlines()
     for i in ouili:
