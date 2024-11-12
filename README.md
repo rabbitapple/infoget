@@ -8,3 +8,7 @@ Tools about information gattering
 - Ping Scanning
 - SubDNS Enumultaion
 - Dir Enumultaion
+
+
+# Useage
+:python3 main.py
