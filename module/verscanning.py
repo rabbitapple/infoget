@@ -1,6 +1,6 @@
 from scapy.all import *
 import os
-from halfscanning import Halfscan
+from module.halfscanning import Halfscan
 import traceback
 import socket
 import random

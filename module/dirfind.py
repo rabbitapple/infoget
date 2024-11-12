@@ -6,7 +6,7 @@ import os
 class Finddir:
     def __init__(self):
         self.path = os.getcwd()        
-        with open(self.path + "/../db_data/dir_db", "r", encoding="UTF-8") as dir_db:
+        with open(self.path + "/db_data/dir_db", "r", encoding="UTF-8") as dir_db:
             dir_data = dir_db.read()
         self.dir_li = dir_data.strip().splitlines()
 

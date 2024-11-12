@@ -18,7 +18,7 @@ class Halfscan:
         else:
             self.gateway_mac = "FF:FF:FF:FF:FF:FF"
 
-        self.my_ip = socket.gethostbyname(socket.gethostname())
+        self.my_ip = self.getmyip()
         
     
 
@@ -36,7 +36,6 @@ class Halfscan:
             ip = s.getsockname()[0]
         finally:
             s.close()
-            print(ip)
         return ip   
 
     
@@ -121,7 +120,7 @@ class Halfscan:
             # 포트 정보 가져오기 / 가공
             with open(self.path + "/../db_data/port_db", "r", encoding="UTF-8") as dbfile:
                 port_db = dbfile.read()
-            print(self.path + "/../db_data/port_db")
+            # print(self.path + "/db_data/port_db")
 
             port_list = port_db.strip().splitlines()
             

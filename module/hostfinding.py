@@ -1,7 +1,7 @@
 from scapy.all import *
 import os
 import traceback
-import oui
+from module import oui
 
 class NDS:
     """

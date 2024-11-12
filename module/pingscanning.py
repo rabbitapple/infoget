@@ -1,5 +1,5 @@
 from scapy.all import *
-from halfscanning import Halfscan
+from module.halfscanning import Halfscan
 
 
 
