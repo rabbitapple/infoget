@@ -167,5 +167,5 @@ class Verscan(Halfscan):
 
 if __name__ == "__main__":
     scan = Verscan()
-    scan.scanstart("172.16.20.15")
+    scan.scanstart("172.16.20.6")
     

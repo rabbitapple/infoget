@@ -28,7 +28,15 @@ class Halfscan:
         Returns:
             str: local ip address
         """
-        ip = socket.gethostbyname(socket.gethostname())
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # Google의 공개 DNS 서버(8.8.8.8)와 임의 연결 시도
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+            print(ip)
         return ip   
 
     
